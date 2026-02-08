@@ -1,8 +1,0 @@
-version: "3"
-
-services:
-  algproc:
-    image: us-central1-docker.pkg.dev/sfujiwara-dev/docker/cloud-run-go-template:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Dockerfile

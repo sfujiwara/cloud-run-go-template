@@ -1,18 +1,14 @@
-FROM golang:1.12.9-alpine3.10 AS build
-
+FROM golang:1.24-alpine3.20 AS build
 WORKDIR /app
-
+COPY src src
 COPY go.mod go.mod
-COPY main.go main.go
+COPY go.sum go.sum
+RUN go build -o server ./src
 
-RUN go build -o server
 
-
-FROM alpine:3.10.2
-
+FROM alpine:3.20
 WORKDIR /app
-
-COPY --from=build /app/server server
+COPY --from=build /app/server ./server
+ENV PORT=8080
 EXPOSE 8080
-
-CMD ["./server"]
+ENTRYPOINT "./server" "--host" "0.0.0.0" "--port" "${PORT}"

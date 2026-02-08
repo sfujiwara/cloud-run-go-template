@@ -1,20 +1,30 @@
-.PHONY: hello
-hello:
-	echo hello
+include config.mk
+
+NAME := cloud-run-go-template
+DOCKER_IMAGE := $(LOCATION)-docker.pkg.dev/$(PROJECT)/docker/$(NAME)
+
+
+.PHONY: go-run
+go-run:
+	go run ./src
 
 .PHONY: docker-build
 docker-build:
-	go build -o _build/server
-	docker build -t cloud-run-go-template .
+	docker build -t $(DOCKER_IMAGE) .
 
 .PHONY: docker-run
 docker-run:
-	docker run --rm -it cloud-run-go-template
+	docker run -p 8080:8080 $(DOCKER_IMAGE)
 
-.PHONY: deploy
-deploy:
-	gcloud run deploy cloud-run-go-template \
-	  --project sfujiwara-dev \
-	  --region us-central1 \
-	  --allow-unauthenticated \
-	  --image us-central1-docker.pkg.dev/sfujiwara-dev/docker/cloud-run-go-template
+.PHONY: cloud-build
+cloud-build:
+	gcloud builds submit --project $(PROJECT) --tag $(DOCKER_IMAGE)
+
+.PHONY: cloud-run
+cloud-run:
+	gcloud run deploy $(NAME) \
+	  --project $(PROJECT) \
+	  --region $(LOCATION) \
+	  --image $(DOCKER_IMAGE) \
+	  --max-instances 10 \
+	  --port 80
